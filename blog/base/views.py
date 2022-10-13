@@ -5,9 +5,16 @@ from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 
+def home(request):
+    top_list = Post.objects.filter(status=1).order_by('-created_on')[:6]
+    featured_list = Post.objects.filter(status=1, priority=1).order_by('-created_on')[:4]
+    context = {'featured_list':featured_list, 'top_list':top_list}
+    return render(request, 'base/home.html', context)
+
 def PostList(request):
     object_list = Post.objects.filter(status=1).order_by('-created_on')
-    paginator = Paginator(object_list, 5)  # 3 posts in each page
+    featured_list = Post.objects.filter(priority=1).order_by('-created_on')
+    paginator = Paginator(object_list, 8)  # 3 posts in each page
     page = request.GET.get('page')
     try:
         post_list = paginator.page(page)
@@ -18,7 +25,7 @@ def PostList(request):
         # If page is out of range deliver last page of results
         post_list = paginator.page(paginator.num_pages)
     return render(request,
-                  'base/index.html',
+                  'base/all_post.html',
                   {'page': page,
                    'post_list': post_list})
 
